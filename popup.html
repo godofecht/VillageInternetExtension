@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Network Conditions Simulator</title>
+  <style>
+    body {
+      width: 350px;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 15px;
+    }
+    h1 {
+      font-size: 18px;
+      margin-top: 0;
+      color: #333;
+    }
+    h2 {
+      font-size: 16px;
+      margin-top: 15px;
+      color: #555;
+    }
+    .form-group {
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      margin-bottom: 3px;
+      font-weight: bold;
+      font-size: 13px;
+    }
+    input, select {
+      width: 100%;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 8px 15px;
+      background-color: #4285f4;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-top: 10px;
+      width: 100%;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #3367d6;
+    }
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    #stopSimulation {
+      background-color: #ea4335;
+      display: none;
+    }
+    #stopSimulation:hover {
+      background-color: #d33426;
+    }
+    .disabled {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    .failure-related {
+      display: none;
+    }
+    #notification {
+      background-color: #4285f4;
+      color: white;
+      padding: 8px;
+      border-radius: 4px;
+      margin-top: 10px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Network Conditions Simulator</h1>
+  
+  <form id="simulationForm">
+    <h2>Bandwidth Limitation</h2>
+    <div class="form-group">
+      <label for="downloadSpeed">Download Speed (KB/s)</label>
+      <input type="number" id="downloadSpeed" value="100" min="1" max="10000">
+    </div>
+    <div class="form-group">
+      <label for="uploadSpeed">Upload Speed (KB/s)</label>
+      <input type="number" id="uploadSpeed" value="50" min="1" max="5000">
+    </div>
+    
+    <h2>Network Conditions</h2>
+    <div class="form-group">
+      <label for="latency">Latency (ms)</label>
+      <input type="number" id="latency" value="0" min="0" max="5000">
+    </div>
+    <div class="form-group">
+      <label for="packetLoss">Packet Loss (%)</label>
+      <input type="number" id="packetLoss" value="0" min="0" max="100">
+    </div>
+    
+    <h2>Remote Village Experience</h2>
+    <div class="form-group">
+      <label for="randomFailures">Random Request Failures (%)</label>
+      <input type="number" id="randomFailures" value="0" min="0" max="100">
+    </div>
+    <div class="form-group failure-related">
+      <label for="failureDuration">Outage Duration (seconds)</label>
+      <input type="number" id="failureDuration" value="30" min="5" max="300">
+    </div>
+    <div class="form-group failure-related">
+      <label for="failureFrequency">Frequency of Outages</label>
+      <select id="failureFrequency">
+        <option value="low">Low (5-15 min)</option>
+        <option value="medium" selected>Medium (2-5 min)</option>
+        <option value="high">High (30s-2m)</option>
+        <option value="extreme">Extreme (10-30s)</option>
+      </select>
+    </div>
+    
+    <h2>Digital Redlining Simulation</h2>
+    <div class="form-group">
+      <label for="sitesToThrottle">Sites to Throttle (comma-separated)</label>
+      <input type="text" id="sitesToThrottle" placeholder="example.com, another-site.com">
+    </div>
+    <div class="form-group">
+      <label for="throttlingLevel">Throttling Level</label>
+      <select id="throttlingLevel">
+        <option value="mild">Mild</option>
+        <option value="moderate" selected>Moderate</option>
+        <option value="severe">Severe</option>
+      </select>
+    </div>
+  </form>
+  
+  <button id="startSimulation">Start Simulation</button>
+  <button id="stopSimulation">Stop Simulation</button>
+  
+  <div id="notification"></div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
