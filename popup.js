@@ -1,145 +1,145 @@
-// Popup script for Network Conditions Simulator
+// popup script. pretty simple stuff.
 
-// Elements cache
+// element refs
 let startButton;
 let stopButton;
 let notification;
 let failureRelatedFields;
 
-// Initialize when popup loads
+// init when popup loads (if it ever does)
 document.addEventListener('DOMContentLoaded', function() {
-  // Cache DOM elements
+  // cache dom elements because querying is slow
   startButton = document.getElementById('startSimulation');
   stopButton = document.getElementById('stopSimulation');
   notification = document.getElementById('notification');
   failureRelatedFields = document.querySelectorAll('.failure-related');
   
-  // Add event listeners
+  // event listeners - because clicking buttons should do something
   startButton.addEventListener('click', startSimulation);
   stopButton.addEventListener('click', stopSimulation);
   
-  // Showing/hiding related fields based on random failures value
+  // show/hide failure stuff based on the percentage
   const randomFailuresInput = document.getElementById('randomFailures');
   randomFailuresInput.addEventListener('input', function() {
     toggleFailureRelatedFields(parseInt(this.value) > 0);
   });
   
-  // Load current settings and simulation state
+  // load whatever was happening before
   loadCurrentState();
 });
 
-// Load current simulation state
+// check what's already going on
 function loadCurrentState() {
   try {
     chrome.runtime.sendMessage({action: 'checkSimulationStatus'}, function(response) {
       if (chrome.runtime.lastError) {
-        showNotification('Error connecting to extension background service.', 'error');
+        showNotification('Service worker dead or missing. Typical.', 'error');
         console.error('Error checking simulation status:', chrome.runtime.lastError);
         return;
       }
       
       if (response && response.active) {
-        // Simulation is active
+        // already running
         updateUIForActiveSimulation(response.settings);
         
         if (response.inOutage) {
-          showNotification('Network outage in progress...', 'warning');
+          showNotification('Network outage happening. Enjoy.', 'warning');
         } else {
           showNotification('Simulation active', 'info');
         }
       } else {
-        // Simulation is not active
+        // not running
         updateUIForInactiveSimulation();
       }
     });
   } catch (e) {
     console.error('Error loading current state:', e);
-    showNotification('An error occurred while loading the current state.', 'error');
+    showNotification('Something broke. No idea what.', 'error');
   }
 }
 
-// Start the network simulation
+// start breaking the internet
 function startSimulation() {
   try {
     const settings = getFormSettings();
     
-    // Validate settings
+    // basic validation
     if (settings.downloadSpeed < 1) {
-      showNotification('Download speed must be at least 1 KB/s', 'error');
+      showNotification('Download speed needs to be at least 1 KB/s. Otherwise just unplug your router.', 'error');
       return;
     }
     
     if (settings.uploadSpeed < 1) {
-      showNotification('Upload speed must be at least 1 KB/s', 'error');
+      showNotification('Upload speed needs to be at least 1 KB/s. Otherwise just unplug your router.', 'error');
       return;
     }
     
-    // Disable form during start
+    // lock the form
     toggleFormEnabled(false);
     showNotification('Starting simulation...', 'info');
     
-    // Send message to background script
+    // tell the background script
     chrome.runtime.sendMessage({
       action: 'startSimulation',
       settings: settings
     }, function(response) {
       if (chrome.runtime.lastError) {
         console.error('Error starting simulation:', chrome.runtime.lastError);
-        showNotification('Failed to start simulation. Try again.', 'error');
+        showNotification('Failed to start. Service worker probably died.', 'error');
         toggleFormEnabled(true);
         return;
       }
       
       if (response && response.success) {
         updateUIForActiveSimulation(settings);
-        showNotification('Simulation started successfully!', 'success');
+        showNotification('Breaking the internet now.', 'success');
       } else {
-        showNotification('Failed to start simulation. Try again.', 'error');
+        showNotification('Failed to start. Who knows why.', 'error');
         toggleFormEnabled(true);
       }
     });
   } catch (e) {
     console.error('Error starting simulation:', e);
-    showNotification('An error occurred while starting the simulation.', 'error');
+    showNotification('Something crashed. Check console for errors.', 'error');
     toggleFormEnabled(true);
   }
 }
 
-// Stop the network simulation
+// stop breaking the internet
 function stopSimulation() {
   try {
-    // Disable buttons during stop
+    // lock buttons
     startButton.disabled = true;
     stopButton.disabled = true;
     showNotification('Stopping simulation...', 'info');
     
-    // Send message to background script
+    // tell background script
     chrome.runtime.sendMessage({
       action: 'stopSimulation'
     }, function(response) {
       if (chrome.runtime.lastError) {
         console.error('Error stopping simulation:', chrome.runtime.lastError);
-        showNotification('Failed to stop simulation. Try again.', 'error');
+        showNotification('Failed to stop. Try reloading the extension.', 'error');
         stopButton.disabled = false;
         return;
       }
       
       if (response && response.success) {
         updateUIForInactiveSimulation();
-        showNotification('Simulation stopped successfully!', 'success');
+        showNotification('Internet should be normal again. Or not.', 'success');
       } else {
-        showNotification('Failed to stop simulation. Try again.', 'error');
+        showNotification('Failed to stop. No idea why.', 'error');
         stopButton.disabled = false;
       }
     });
   } catch (e) {
     console.error('Error stopping simulation:', e);
-    showNotification('An error occurred while stopping the simulation.', 'error');
+    showNotification('Error stopping. Check console.', 'error');
     stopButton.disabled = false;
   }
 }
 
-// Get settings from form
+// get values from inputs
 function getFormSettings() {
   return {
     downloadSpeed: parseInt(document.getElementById('downloadSpeed').value) || 100,
@@ -154,7 +154,7 @@ function getFormSettings() {
   };
 }
 
-// Fill form with settings
+// fill form with settings - rocket science
 function fillFormWithSettings(settings) {
   if (!settings) return;
   
@@ -178,12 +178,12 @@ function fillFormWithSettings(settings) {
   toggleFailureRelatedFields(settings.randomFailures > 0);
 }
 
-// Show notification message
+// display a message to the user - amazing UX
 function showNotification(message, type = 'info') {
   notification.textContent = message;
   notification.style.display = 'block';
   
-  // Set color based on type
+  // colors for different message types
   switch (type) {
     case 'error':
       notification.style.backgroundColor = '#ea4335';
@@ -201,7 +201,7 @@ function showNotification(message, type = 'info') {
       break;
   }
   
-  // Hide notification after a delay for non-error messages
+  // hide notification after delay unless it's an error
   if (type !== 'error') {
     setTimeout(() => {
       notification.style.display = 'none';
@@ -209,7 +209,7 @@ function showNotification(message, type = 'info') {
   }
 }
 
-// Update UI for active simulation
+// update UI for active simulation
 function updateUIForActiveSimulation(settings) {
   startButton.style.display = 'none';
   stopButton.style.display = 'block';
@@ -220,14 +220,14 @@ function updateUIForActiveSimulation(settings) {
   }
 }
 
-// Update UI for inactive simulation
+// update UI for inactive simulation
 function updateUIForInactiveSimulation() {
   startButton.style.display = 'block';
   stopButton.style.display = 'none';
   toggleFormEnabled(true);
 }
 
-// Toggle form fields enabled/disabled
+// enable/disable form elements
 function toggleFormEnabled(enabled) {
   const form = document.getElementById('simulationForm');
   const formElements = form.querySelectorAll('input, select');
@@ -243,7 +243,7 @@ function toggleFormEnabled(enabled) {
   }
 }
 
-// Toggle visibility of failure-related fields
+// toggle failure fields visibility
 function toggleFailureRelatedFields(show) {
   failureRelatedFields.forEach(field => {
     field.style.display = show ? 'block' : 'none';

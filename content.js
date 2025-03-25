@@ -1,19 +1,19 @@
-// Content script for Network Conditions Simulator
+// content script. makes websites look broken.
 
-// Current outage state
+// state tracking
 let isCurrentlyInOutage = false;
 let outageOverlay = null;
 let simulationActive = false;
 let currentSettings = null;
 
-// Constants for visual effects
+// css class names - don't change or everything breaks
 const LOADING_ANIMATION_CLASS = 'network-simulator-loading';
 const STYLE_ELEMENT_ID = 'network-simulator-styles';
 
-// Initialize when page loads
+// init when page loads - if it ever does
 initializeWhenReady();
 
-// Listen for messages from background script
+// Listen for background messages - if they even arrive
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.action === 'simulationStatus') {
     // Update simulation status

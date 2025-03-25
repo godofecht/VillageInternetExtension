@@ -1,56 +1,53 @@
-# Network Conditions Simulator for Opera
+# slow internet thing
 
-A browser extension that simulates various network conditions including low internet speed, ISP throttling, and digital redlining.
+makes your internet slow. why? because sometimes you need to test stuff on slow internet. do i need to explain this?
 
-## Features
+## what it does
 
-- **Bandwidth Limitation**: Simulate slow download and upload speeds
-- **Network Conditions**: Add latency and packet loss to simulate poor connections
-- **Remote Village Experience**: Simulate complete connection outages and random request failures like you would experience developing in a remote location
-- **Digital Redlining Simulation**: Target specific websites for throttling to simulate ISP practices
+- slows down your internet
+- adds lag
+- drops packets
+- randomly breaks stuff
+- simulates crappy ISPs that throttle specific sites
 
-## Installation
+## setup
 
-1. Open Opera browser
-2. Navigate to `opera://extensions`
-3. Enable "Developer Mode" using the toggle in the top-right corner
-4. Click "Load unpacked" and select the extension folder
-5. The Network Conditions Simulator should now appear in your extensions list
+1. go to `opera://extensions`
+2. turn on developer mode
+3. load unpacked
+4. select this folder
+5. whatever
 
-## Usage
+## using it
 
-1. Click on the extension icon in the browser toolbar to open the popup
-2. Configure your desired network settings:
-   - Set download/upload speeds
-   - Set latency and packet loss values
-   - Configure random outages and failures frequency
-   - Specify any sites you want to throttle
-3. Click "Start Simulation" to begin throttling network requests
-4. Click "Stop Simulation" to return to normal browsing
+1. click the icon (if it even shows up)
+2. set numbers for speed/lag/etc
+3. hit start
+4. suffer
+5. hit stop when you've had enough
 
-## Configuration Options
+## settings
 
-- **Download/Upload Speed**: Set bandwidth limits in KB/s
-- **Latency**: Add delay to network requests in milliseconds
-- **Packet Loss**: Randomly drop a percentage of network requests
-- **Random Request Failures**: Percentage of requests that will randomly fail
-- **Outage Duration**: How long network outages last (in seconds)
-- **Frequency of Outages**: How often network outages occur
-- **Sites to Throttle**: Specify domains to apply targeted throttling
-- **Throttling Level**: Choose how severely to throttle specified sites
+- **download/upload**: slower = worse, what did you expect
+- **latency**: higher = more annoying lag
+- **packet loss**: % of stuff that just disappears into the void
+- **random failures**: % chance of requests just dying
+- **outage duration**: how long everything breaks (seconds)
+- **outage frequency**: how often everything breaks
+- **targeted throttling**: specific sites to punish
+- **throttling level**: how bad to make it for those sites
 
-## Notes for Developers
+## tech stuff
 
-The extension uses the Chrome/Opera WebRequest API to intercept and throttle network requests. It works by:
+uses webRequest API + service worker. used to be simple before manifest v3 ruined everything. had to switch to declarativeNetRequest which is garbage and can't do half the things webRequest could.
 
-1. Intercepting outgoing requests with the `webRequest.onBeforeRequest` listener
-2. Applying artificial delays based on configured settings
-3. Simulating packet loss by randomly canceling some requests
-4. Periodically triggering complete network outages based on frequency settings
-5. Adding visual indicators during outages to simulate poor connectivity
+## limitations
 
-## Limitations
+- sometimes doesn't work
+- can't throttle certain things because manifest v3 sucks
+- probably breaks on secure pages
+- definitely breaks with opera vpn
 
-- The extension may not work on certain pages with advanced security features
-- Some types of WebRTC and WebSocket communications might bypass the throttling
-- Opera's built-in VPN may interfere with the extension's functionality
+## why
+
+because the internet isn't always gigabit fiber with 0.1ms latency. deal with it.

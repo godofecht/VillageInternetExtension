@@ -1,19 +1,19 @@
-// Global state 
+// State vars. don't touch.
 let simulationActive = false;
 let currentSettings = null;
 let throttledSites = [];
 
-// Outage simulation variables
+// Outage stuff
 let isInOutage = false;
 let outageTimeout = null;
 let nextOutageTimeout = null;
 
-// Rule IDs for declarativeNetRequest
+// Rule IDs for declarativeNetRequest - don't change these or everything breaks
 const THROTTLING_RULE_ID = 1;
 const OUTAGE_RULE_ID = 2;
 const PACKET_LOSS_RULE_ID = 3;
 
-// Initialize state from storage when service worker starts
+// Init when this thing wakes up
 function initializeExtension() {
   chrome.storage.local.get(['simulationActive', 'currentSettings'], function(data) {
     if (data && data.simulationActive) {
@@ -35,16 +35,16 @@ function initializeExtension() {
   });
 }
 
-// Initialize when extension is first installed or updated
+// Init when extension installed (if anyone ever actually installs this)
 chrome.runtime.onInstalled.addListener((details) => {
   console.log('Extension installed or updated:', details.reason);
   initializeExtension();
 });
 
-// Re-initialize when service worker starts
+// Re-init when service worker starts (which is all the time because browsers are dumb)
 initializeExtension();
 
-// Listen for messages from popup
+// Listen for popup messages
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.action === 'startSimulation') {
     simulationActive = true;
@@ -103,7 +103,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   return true; // Indicates async response
 });
 
-// Keep service worker alive during simulation
+// Keep service worker alive - Chrome keeps killing it because why not
 function keepAlive() {
   if (simulationActive) {
     // Send a message to self to prevent service worker from being terminated
@@ -116,7 +116,7 @@ function keepAlive() {
   }
 }
 
-// Setup declarativeNetRequest rules
+// Setup declarativeNetRequest rules - worse than webRequest but hey, Google knows best right?
 function setupNetworkRules() {
   if (!simulationActive || !currentSettings) {
     return;
@@ -134,7 +134,7 @@ function setupNetworkRules() {
       if (failureRate > 0) {
         // Apply random failures based on percentage
         // We can't truly simulate percentage-based failures with declarativeNetRequest
-        // Instead we'll use the visual indicators in content.js to show the simulation
+        // Thanks Google for removing the useful APIs and giving us this garbage
         rules.push({
           id: PACKET_LOSS_RULE_ID,
           priority: 1,
@@ -145,7 +145,7 @@ function setupNetworkRules() {
           condition: {
             urlFilter: '*',
             resourceTypes: ['main_frame', 'sub_frame', 'stylesheet', 'script', 'image', 'font', 'object', 'xmlhttprequest', 'ping', 'media', 'websocket'],
-            // We can't do percentage-based filtering in MV3, so we'll use a specific pattern
+            // Can't do percentage-based filtering in MV3, so we'll use a specific pattern
             // that will only match extremely rarely (basically never)
             regexFilter: "^https://.*(?:SIMULATE_RARE_MATCH_FOR_EXTENSION_RANDOM_FAILURE).*$"
           }
@@ -184,7 +184,7 @@ function clearNetworkRules() {
   });
 }
 
-// Schedule the next network outage
+// Schedule the next network outage - exciting!
 function scheduleNextOutage() {
   if (!simulationActive || !currentSettings || !currentSettings.randomFailures || currentSettings.randomFailures <= 0) {
     clearOutageTimeouts();
@@ -252,7 +252,7 @@ try {
   console.error('Error setting up alarms listener:', e);
 }
 
-// Start a network outage
+// Start a network outage - everything stops working, just like real internet
 function startOutage() {
   if (!simulationActive) return;
   
@@ -279,7 +279,7 @@ function startOutage() {
   }, (currentSettings.failureDuration || 30) * 1000);
 }
 
-// End a network outage
+// End a network outage - back to just being slow instead of dead
 function endOutage() {
   if (!simulationActive) return;
   
@@ -296,7 +296,7 @@ function endOutage() {
   scheduleNextOutage();
 }
 
-// Calculate time until next outage based on frequency setting
+// Calculate time until next outage - completely arbitrary but whatever
 function calculateTimeUntilNextOutage(frequency) {
   let minTime, maxTime;
   
@@ -326,7 +326,7 @@ function calculateTimeUntilNextOutage(frequency) {
   return Math.floor(Math.random() * (maxTime - minTime)) + minTime;
 }
 
-// Clear all outage-related timeouts
+// Clear all outage-related timeouts - cleanup is important I guess
 function clearOutageTimeouts() {
   if (outageTimeout) {
     clearTimeout(outageTimeout);
@@ -348,7 +348,7 @@ function clearOutageTimeouts() {
   }
 }
 
-// Notify tabs about outage status
+// Notify tabs about outage status - if they're still listening
 function notifyTabsAboutOutage(isStarting) {
   try {
     chrome.tabs.query({}, function(tabs) {
@@ -382,7 +382,7 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Needed to register the service worker with listeners before page loads
+// Service worker lifecycle - nobody cares but chrome needs it
 self.addEventListener('install', (event) => {
   console.log('Service worker installed');
   self.skipWaiting();
